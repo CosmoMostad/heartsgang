@@ -1,0 +1,27 @@
+{
+  "name": "heartsgang",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Hearts with friends: shared-seat teams, 3-6 seats, every house rule as a switch.",
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "infra"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "typecheck": "tsc -p packages/engine && tsc -p apps/server && tsc -p apps/web && tsc -p infra",
+    "test": "vitest run",
+    "build": "npm run build -w apps/web && npm run build -w apps/server && node scripts/package.mjs",
+    "e2e": "playwright test",
+    "start": "node dist/release/server/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  }
+}

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+apps/web/dist/
+apps/server/dist/
+infra/cdk.out/
+test-results/
+playwright-report/
+*.log
+.data/
