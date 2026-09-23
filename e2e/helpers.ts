@@ -38,6 +38,7 @@ export async function actIfAsked(page: Page): Promise<boolean> {
     const need = Number((await pass.textContent())!.match(/\d/)![0]);
     if (raised < need) {
       await page.locator('.hand-card:not(.raised)').last().click();
+      await expect(page.locator('.hand-card.raised')).toHaveCount(raised + 1).catch(() => {});
       return true;
     }
     if (await pass.isEnabled()) { await pass.click(); return true; }
@@ -47,7 +48,10 @@ export async function actIfAsked(page: Page): Promise<boolean> {
   if (await play.count()) {
     if (!(await play.isEnabled())) {
       const legal = page.locator('.hand-card:not(.illegal)');
-      if (await legal.count()) await legal.first().click();
+      if (await legal.count()) {
+        await legal.first().click();
+        await expect(play).toBeEnabled({ timeout: 3000 }).catch(() => {});
+      }
       return true;
     }
     await play.click();

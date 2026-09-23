@@ -200,7 +200,9 @@ button:disabled { cursor: not-allowed; }
   to { transform: translate(calc(-50% + var(--wx)), calc(-50% + var(--wy))) rotate(calc(var(--tilt) * 3)) scale(0.4); opacity: 0; }
 }
 
-.table-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 30; width: min(440px, 76%); display: grid; place-items: center; }
+.table-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 15; width: min(440px, 76%); display: grid; place-items: center; }
+.table-center:has(.panel) { z-index: 40; }
+
 
 .mini-fan { position: absolute; width: 0; height: 0; z-index: 8; pointer-events: none; }
 
@@ -537,6 +539,11 @@ button:disabled { cursor: not-allowed; }
   .avatar { width: 26px !important; height: 26px !important; font-size: 12px !important; }
   .timer-ring { width: 36px; height: 36px; }
   .table-wrap { min-height: 260px; --tw: clamp(38px, 11vw, 60px); }
+  .pass-banner { padding: 8px 12px; border-radius: 14px; }
+  .pass-banner b { font-size: 16px; }
+  .pass-banner small { display: none; }
+  .pass-arrow { font-size: 22px; }
+  .table-center { width: min(300px, 88%); }
   .rail { inset: 13% 6%; }
   .action-bar { min-height: 48px; gap: 6px 12px; }
   .btn.big { padding: 11px 20px; font-size: 16px; }

@@ -1,4 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+/** True on phone-width screens, where the table is too small to hold the start button. */
+function useNarrow(): boolean {
+  const query = '(max-width: 760px)';
+  const [narrow, setNarrow] = useState(() => window.matchMedia(query).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const on = () => setNarrow(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  return narrow;
+}
 import { ruleChips, type RoomView } from '@heartsgang/engine';
 import { Avatar, Table } from '../components/Table';
 import { Chat } from '../components/Chat';
@@ -8,9 +21,22 @@ import { leaveTable, send, toast, useStore } from '../store';
 export function Lobby({ room }: { room: RoomView }) {
   const emotes = useStore((s) => s.emotes);
   const [editing, setEditing] = useState(false);
+  const narrow = useNarrow();
   const host = room.you.host;
   const empty = room.seats.filter((s) => !s.players.length && !s.bot);
   const link = `${location.origin}/${room.code}`;
+
+  const startBlock = (
+    <div className="lobby-center">
+                {host ? (
+                  <>
+                    <button className="btn primary big" id="start-btn" disabled={empty.length > 0} onClick={() => send({ t: 'start' })}>Start game</button>
+                    {empty.length > 0 && <p className="muted">Fill {empty.map((s) => s.colorName).join(', ')} to start{' '}
+                      <button className="link-btn" onClick={() => send({ t: 'fillBots' })}>or add bots</button></p>}
+                  </>
+                ) : <p className="muted">Waiting for the host to start…</p>}
+              </div>
+  );
 
   const copy = async () => {
     try {
@@ -43,17 +69,8 @@ export function Lobby({ room }: { room: RoomView }) {
 
       <div className="lobby-body">
         <section className="lobby-table">
-          <Table room={room} emotes={emotes} center={
-            <div className="lobby-center">
-              {host ? (
-                <>
-                  <button className="btn primary big" id="start-btn" disabled={empty.length > 0} onClick={() => send({ t: 'start' })}>Start game</button>
-                  {empty.length > 0 && <p className="muted">Fill {empty.map((s) => s.colorName).join(', ')} to start{' '}
-                    <button className="link-btn" onClick={() => send({ t: 'fillBots' })}>or add bots</button></p>}
-                </>
-              ) : <p className="muted">Waiting for the host to start…</p>}
-            </div>
-          } />
+          <Table room={room} emotes={emotes} center={narrow ? undefined : startBlock} />
+          {narrow && <div className="lobby-center-below">{startBlock}</div>}
 
           <div className="seat-list">
             {room.seats.map((s) => {

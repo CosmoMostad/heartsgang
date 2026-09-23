@@ -59,17 +59,22 @@ test('friends join by code, team up in one seat, and play as a team', async ({ b
   await expect(kim.getByRole('tab', { name: /Team/ })).toHaveCount(0);
   await expect(kim.locator('.messages')).not.toContainText('pass the ace?');
 
-  // Sam finishes the pick and presses Pass for the team.
+  // Sam finishes the pick and presses Pass for the team. Each highlight round-trips through the server.
   await sam.locator('.hand-card:not(.raised)').nth(0).click();
+  await expect(sam.locator('.hand-card.raised')).toHaveCount(2);
   await expect(sam.locator('#pass-btn')).toBeDisabled();
   await sam.locator('.hand-card:not(.raised)').nth(0).click();
+  await expect(sam.locator('.hand-card.raised')).toHaveCount(3);
   await expect(sam.locator('#pass-btn')).toBeEnabled();
   const passed = await sam.locator('.hand-card.raised [data-card]').evaluateAll((els) => els.map((e) => e.getAttribute('data-card')));
   await sam.click('#pass-btn');
   await expect(page.getByText(/Passed\. Waiting for/)).toBeVisible();
 
   // Kim passes; cards change hands and the received ones are tagged.
-  for (let i = 0; i < 3; i++) await kim.locator('.hand-card:not(.raised)').first().click();
+  for (let i = 1; i <= 3; i++) {
+    await kim.locator('.hand-card:not(.raised)').first().click();
+    await expect(kim.locator('.hand-card.raised')).toHaveCount(i);
+  }
   await kim.click('#pass-btn');
   await expect(page.locator('.new-tag')).toHaveCount(3);
   const after = await handCards(page);
