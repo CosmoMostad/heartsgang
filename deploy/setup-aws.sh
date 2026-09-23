@@ -1,6 +1,6 @@
 #!/bin/bash
 # One-time AWS setup for heartsgang.net. Paste into AWS CloudShell (the >_ icon in the console top bar).
-# Creates: a GitHub sign-in role that only the CosmoMostad/heartsgang repo can use, the Route 53 zone
+# Creates: a GitHub sign-in role that only the main branch of CosmoMostad/heartsgang can use, the Route 53 zone
 # for the domain (or reuses the one Route 53 made when you bought it), and a $20/month budget alert.
 set -uo pipefail
 DOMAIN="heartsgang.net"
@@ -12,12 +12,13 @@ aws iam create-open-id-connect-provider \
   --client-id-list sts.amazonaws.com \
   --thumbprint-list 6938fd4d98bab03faadb97b34396831e3780aea1 >/dev/null 2>&1 || true
 
+# GitHub signs this repo's tokens with ids (repo:owner@id/name@id:...); the plain-name form is kept as a fallback.
 cat > /tmp/heartsgang-trust.json <<JSON
 {"Version":"2012-10-17","Statement":[{"Effect":"Allow",
  "Principal":{"Federated":"arn:aws:iam::${ACCOUNT}:oidc-provider/token.actions.githubusercontent.com"},
  "Action":"sts:AssumeRoleWithWebIdentity",
  "Condition":{"StringEquals":{"token.actions.githubusercontent.com:aud":"sts.amazonaws.com"},
-  "StringLike":{"token.actions.githubusercontent.com:sub":["repo:CosmoMostad/heartsgang:*","repo:cosmomostad/heartsgang:*"]}}}]}
+  "StringLike":{"token.actions.githubusercontent.com:sub":["repo:CosmoMostad@263053613/heartsgang@1382531211:ref:refs/heads/main","repo:CosmoMostad/heartsgang:ref:refs/heads/main"]}}}]}
 JSON
 aws iam create-role --role-name heartsgang-deploy --assume-role-policy-document file:///tmp/heartsgang-trust.json >/dev/null 2>&1 \
   || aws iam update-assume-role-policy --role-name heartsgang-deploy --policy-document file:///tmp/heartsgang-trust.json

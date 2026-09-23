@@ -14,7 +14,7 @@ NAMESERVERS (only needed if you bought the domain outside Route 53):
 ns-1.awsdns-01.org  ns-2.awsdns-02.co.uk  ns-3.awsdns-03.com  ns-4.awsdns-04.net
 ```
 
-The role can only be used by GitHub Actions runs from `CosmoMostad/heartsgang`.
+The role can only be used by GitHub Actions runs on the `main` branch of `CosmoMostad/heartsgang`. Run the script inside the AWS account dedicated to Hearts Gang, not a shared one: the role has full admin over whatever account it lives in.
 
 **2. Point the domain at AWS.** Skip this if you bought heartsgang.net through Route 53. Otherwise, at your registrar (GoDaddy, Namecheap, Squarespace, Porkbun…), replace the domain's nameservers with the four printed above. Cloudflare Registrar does not allow this; keep DNS there and add an `A` record for `heartsgang.net` and `www` pointing at the server IP the deploy prints.
 

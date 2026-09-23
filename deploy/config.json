@@ -1,5 +1,5 @@
 {
-  "awsRoleArn": "arn:aws:iam::520432095447:role/heartsgang-deploy",
+  "awsRoleArn": "arn:aws:iam::331262815578:role/heartsgang-deploy",
   "region": "us-east-1",
   "domain": "heartsgang.net"
 }
