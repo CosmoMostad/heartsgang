@@ -30,18 +30,24 @@ export async function handCards(page: Page): Promise<string[]> {
   return page.locator('.hand-card [data-card]').evaluateAll((els) => els.map((e) => e.getAttribute('data-card')!));
 }
 
-/** Act for this page's seat if it has something to do: pick and pass, or pick and play. Returns true if it acted. */
+const CLICK_MS = 3000;
+
+/**
+ * Act for this page's seat if it has something to do: pick and pass, or pick and play. Returns true if it acted.
+ * Clicks give up after a few seconds: the server can move the game on underneath us (turn timers, or auto-playing
+ * a seat's only legal card), and a click that waits forever for a button that will never re-enable hangs the test.
+ */
 export async function actIfAsked(page: Page): Promise<boolean> {
   const pass = page.locator('#pass-btn');
   if (await pass.count()) {
     const raised = await page.locator('.hand-card.raised').count();
     const need = Number((await pass.textContent())!.match(/\d/)![0]);
     if (raised < need) {
-      await page.locator('.hand-card:not(.raised)').last().click();
+      await page.locator('.hand-card:not(.raised)').last().click({ timeout: CLICK_MS }).catch(() => {});
       await expect(page.locator('.hand-card.raised')).toHaveCount(raised + 1).catch(() => {});
       return true;
     }
-    if (await pass.isEnabled()) { await pass.click(); return true; }
+    if (await pass.isEnabled()) { await pass.click({ timeout: CLICK_MS }).catch(() => {}); return true; }
     return false;
   }
   const play = page.locator('#play-btn');
@@ -49,12 +55,12 @@ export async function actIfAsked(page: Page): Promise<boolean> {
     if (!(await play.isEnabled())) {
       const legal = page.locator('.hand-card:not(.illegal)');
       if (await legal.count()) {
-        await legal.first().click();
+        await legal.first().click({ timeout: CLICK_MS }).catch(() => {});
         await expect(play).toBeEnabled({ timeout: 3000 }).catch(() => {});
       }
       return true;
     }
-    await play.click();
+    await play.click({ timeout: CLICK_MS }).catch(() => {});
     return true;
   }
   return false;
