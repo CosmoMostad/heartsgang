@@ -14,8 +14,6 @@ const PIPS: Record<string, [number, number][]> = {
   T: [[26, 8], [74, 8], [50, 22], [26, 36], [74, 36], [26, 64], [74, 64], [50, 78], [26, 92], [74, 92]],
 };
 
-const FACE_GLYPH: Record<string, string> = { J: '⚜', Q: '♛', K: '♚' };
-
 export interface CardProps {
   card: CardId;
   className?: string;
@@ -31,10 +29,10 @@ export const CardFace = memo(function CardFace({ card, className = '', style, ti
   const label = rank === 'T' ? '10' : rank;
   const face = rank === 'J' || rank === 'Q' || rank === 'K';
   return (
-    <div className={`card face ${red ? 'red' : 'black'} ${face ? 'court' : ''} ${card === 'QS' ? 'lady' : ''} ${className}`} style={style} title={title} data-card={card}>
+    <div className={`card face ${red ? 'red' : 'black'} ${face ? 'court' : ''} ${className}`} style={style} title={title} data-card={card}>
       <span className="idx tl"><b>{label}</b><i>{sym}</i></span>
       <span className="idx br"><b>{label}</b><i>{sym}</i></span>
-      {rank === 'A' && <span className={`ace ${suit === 'S' ? 'spade' : ''}`}>{sym}</span>}
+      {rank === 'A' && <span className="ace">{sym}</span>}
       {PIPS[rank] && (
         <span className="pips">
           {PIPS[rank].map(([x, y], i) => (
@@ -42,13 +40,7 @@ export const CardFace = memo(function CardFace({ card, className = '', style, ti
           ))}
         </span>
       )}
-      {face && (
-        <span className="courtframe">
-          <span className="glyph">{FACE_GLYPH[rank]}</span>
-          <span className="courtletter">{label}</span>
-          <span className="courtsuit">{sym}</span>
-        </span>
-      )}
+      {face && <span className="court-mark"><b>{label}</b><i>{sym}</i></span>}
     </div>
   );
 });

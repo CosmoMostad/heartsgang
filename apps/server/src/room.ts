@@ -307,7 +307,7 @@ export class Room implements RoomSnapshot {
     if (this.phase === 'game' && seat !== null && !this.seatMembers()[seat].length) {
       const used = new Set(this.bots.filter(Boolean));
       this.bots[seat] = BOT_NAMES.find((n) => !used.has(n)) ?? `Bot ${seat + 1}`;
-      this.system(`${this.bots[seat]} is keeping ${SEAT_COLORS[seat].name}’s seat warm.`);
+      this.system(`${this.bots[seat]} is keeping seat ${seat + 1} warm.`);
     }
     if (this.picks[seat ?? -1]) {
       const picks = this.picks[seat!];
@@ -351,7 +351,7 @@ export class Room implements RoomSnapshot {
     this.requireHost(id);
     if (this.phase !== 'lobby') throw new GameError('The game has already started.');
     const empty = this.seatMembers().map((m, i) => (m.length || this.bots[i] ? -1 : i)).filter((i) => i >= 0);
-    if (empty.length) throw new GameError(`Fill every seat first: ${empty.map((i) => SEAT_COLORS[i].name).join(', ')} ${empty.length > 1 ? 'are' : 'is'} empty.`);
+    if (empty.length) throw new GameError(`Fill every seat first: ${empty.length > 1 ? `seats ${empty.map((i) => i + 1).join(', ')} are` : `seat ${empty[0] + 1} is`} empty.`);
     this.phase = 'game';
     this.game = createGame(this.rules, this.deps.rng);
     this.onDealt();
@@ -675,7 +675,7 @@ export class Room implements RoomSnapshot {
     if (this.bots[seat] && !members.length) return this.bots[seat]!;
     if (members.length === 1) return members[0].name;
     if (members.length > 1) return members.map((m) => m.name).join(' & ');
-    return SEAT_COLORS[seat].name;
+    return `Seat ${seat + 1}`;
   }
 
   private playerView(p: Player): PlayerView {

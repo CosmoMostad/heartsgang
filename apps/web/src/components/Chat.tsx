@@ -77,7 +77,7 @@ export function Chat({ room, onUnread }: { room: RoomView; onUnread?: (n: number
           Table {active !== 'table' && unread.table > 0 && <span className="badge">{unread.table}</span>}
         </button>
         {hasTeam && (
-          <button role="tab" aria-selected={active === 'team'} className={active === 'team' ? 'on team' : 'team'} onClick={() => setTab('team')} style={{ ['--seat' as string]: room.seats[mySeat!].color }}>
+          <button role="tab" aria-selected={active === 'team'} className={active === 'team' ? 'on team' : 'team'} onClick={() => setTab('team')}>
             Team {active !== 'team' && unread.team > 0 && <span className="badge">{unread.team}</span>}
           </button>
         )}

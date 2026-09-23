@@ -21,27 +21,13 @@ function tilt(card: string): number {
   return (h % 17) - 8;
 }
 
-export function Avatar({ name, color, connected = true, bot = false, size = 34 }: { name: string; color: string; connected?: boolean; bot?: boolean; size?: number }) {
-  return (
-    <span className={`avatar ${connected ? '' : 'away'}`} style={{ width: size, height: size, borderColor: color, fontSize: size * 0.42 }} title={name + (connected ? '' : ' (away)')}>
-      {bot ? '🤖' : name.slice(0, 1).toUpperCase()}
-    </span>
-  );
-}
-
-function TimerRing({ deadline, total }: { deadline: number; total: number }) {
+/** A thin bar under a seat's name that drains until the timer runs out. */
+function TimerBar({ deadline, total }: { deadline: number; total: number }) {
   const remaining = Math.max(0, deadline - serverNow());
-  const startFrac = Math.min(1, remaining / total);
   return (
-    <svg className="timer-ring" viewBox="0 0 44 44" aria-hidden>
-      <circle cx="22" cy="22" r="20" className="track" />
-      <circle
-        key={deadline}
-        cx="22" cy="22" r="20"
-        className="run"
-        style={{ ['--start' as string]: `${(1 - startFrac) * 125.7}`, animationDuration: `${remaining}ms` }}
-      />
-    </svg>
+    <span className="plate-timer" aria-hidden>
+      <i key={deadline} style={{ ['--from' as string]: `${Math.min(1, remaining / total)}`, animationDuration: `${remaining}ms` }} />
+    </span>
   );
 }
 
@@ -141,13 +127,11 @@ function Seat({ seat, room, bottom, emotes, narrow }: { seat: SeatView; room: Ro
   const count = g?.handCounts[seat.index] ?? 0;
   const score = g?.scores[seat.index] ?? 0;
   const pts = g?.handPoints[seat.index] ?? 0;
-  const tookQueen = g?.taken[seat.index]?.includes('QS');
-  const tookJack = room.rules.jackOfDiamonds && g?.taken[seat.index]?.includes('JD');
   const side = pos.x < 26 ? 'left' : pos.x > 74 ? 'right' : pos.y > 50 ? 'bottom' : 'top';
-  const label = seat.players.length || seat.bot ? seat.label : 'Open seat';
+  const label =seat.players.length || seat.bot ? seat.label : 'Open seat';
+  const away = seat.players.length > 0 && seat.players.every((p) => !p.connected);
   const total = (passing ? room.rules.passSeconds : room.rules.playSeconds) * 1000;
-  const showRing = !!room.deadline && ((isTurn && room.deadlineKind === 'play') || (passing && !g?.passed[seat.index]));
-  const leader = g && g.phase !== 'passing' && Math.min(...g.scores) === score && g.scores.some((x) => x !== score);
+  const showTimer = !!room.deadline && ((isTurn && room.deadlineKind === 'play') || (passing && !g?.passed[seat.index]));
 
   return (
     <>
@@ -159,36 +143,17 @@ function Seat({ seat, room, bottom, emotes, narrow }: { seat: SeatView; room: Ro
           })}
         </div>
       )}
-      <div
-        className={`seat seat-${side} ${isTurn ? 'turn' : ''} ${isMe ? 'me' : ''}`}
-        style={{ left: `${pos.x}%`, top: `${pos.y}%`, ['--seat' as string]: seat.color }}
-        data-seat={seat.index}
-      >
+      <div className={`seat seat-${side} ${isTurn ? 'turn' : ''} ${isMe ? 'me' : ''} ${away ? 'away' : ''}`} style={{ left: `${pos.x}%`, top: `${pos.y}%` }} data-seat={seat.index}>
         <div className="plate">
-          <div className="avatars">
-            {seat.players.length === 0 && seat.bot && <Avatar name={seat.bot} color={seat.color} bot />}
-            {seat.players.length === 0 && !seat.bot && <span className="avatar empty" style={{ borderColor: seat.color }}>?</span>}
-            {seat.players.map((p) => <Avatar key={p.id} name={p.name} color={p.color} connected={p.connected} />)}
-            {showRing && room.deadline && <TimerRing deadline={room.deadline} total={total} />}
-          </div>
-          <div className="plate-text">
-            <div className="plate-name" title={label}>{label}</div>
-            <div className="plate-meta">
-              <span className="seat-color">{seat.colorName}</span>
-              {isMe && <span className="you-meta">you</span>}
-              {seat.players.length > 1 && !isMe && <span className="team-tag">team of {seat.players.length}</span>}
-            </div>
-          </div>
+          <span className="plate-name" title={away ? `${label} (away)` : label}>{label}</span>
           {g && (
-            <div className="plate-score">
-              <span className={`total ${leader ? 'leading' : ''}`} title="Game score">{score}</span>
-              <span className="hand-pts" title="Points taken this hand">
-                {pts > 0 ? '+' : ''}{pts}<i>♥</i>{tookQueen && <b className="q">Q♠</b>}{tookJack && <b className="j">J♦</b>}
-              </span>
-            </div>
+            <span className="plate-score">
+              <span className="total" title="Game score">{score}</span>
+              {pts > 0 && <span className="hand-pts" title="Points taken this hand">+{pts}</span>}
+            </span>
           )}
+          {showTimer && room.deadline && <TimerBar deadline={room.deadline} total={total} />}
           {passing && g?.passed[seat.index] && <span className="passed-badge" title="Passed">✓</span>}
-          {isTurn && <span className="thinking" aria-label="Their turn"><i /><i /><i /></span>}
         </div>
         {emotes.map((e) => (
           <span key={e.key} className="emote-bubble" title={e.name}>

@@ -28,7 +28,6 @@ function Choice<T extends string | number>({ id, label, value, options, onChange
 
 /** A little top-down seat diagram for a mode card. */
 export function SeatDiagram({ seats, maxPerSeat }: { seats: number; maxPerSeat: number }) {
-  const colors = ['#e0525a', '#4c8ce6', '#35b27a', '#e9b23c', '#a371ec', '#2cc3bd'];
   return (
     <svg className="seat-diagram" viewBox="0 0 100 64" aria-hidden>
       <ellipse cx="50" cy="32" rx="30" ry="17" className="dg-table" />
@@ -39,7 +38,7 @@ export function SeatDiagram({ seats, maxPerSeat }: { seats: number; maxPerSeat: 
         return (
           <g key={i}>
             {Array.from({ length: maxPerSeat }, (_, k) => (
-              <circle key={k} cx={x + (k - (maxPerSeat - 1) / 2) * 7} cy={y} r={maxPerSeat > 1 ? 4.2 : 5.2} fill={colors[i]} opacity={k === 0 ? 1 : 0.55} />
+              <circle key={k} cx={x + (k - (maxPerSeat - 1) / 2) * 7} cy={y} r={maxPerSeat > 1 ? 4.2 : 5.2} className="dg-seat" opacity={k === 0 ? 1 : 0.55} />
             ))}
           </g>
         );

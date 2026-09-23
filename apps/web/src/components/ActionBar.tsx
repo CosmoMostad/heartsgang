@@ -40,7 +40,7 @@ export function ActionBar({ room }: { room: RoomView }) {
     button = open.length ? (
       <div className="join-seats">
         {open.map((s) => (
-          <button key={s.index} className="btn small" style={{ ['--seat' as string]: s.color }} onClick={() => send({ t: 'sit', seat: s.index })}>
+          <button key={s.index} className="btn small" onClick={() => send({ t: 'sit', seat: s.index })}>
             Join {s.bot ? `(replace ${s.bot})` : s.label}
           </button>
         ))}

@@ -3,10 +3,6 @@ import { cardLabel, type RoomView } from '@heartsgang/engine';
 import { CardFace } from './Card';
 import { send, serverNow } from '../store';
 
-function SeatDot({ color }: { color: string }) {
-  return <span className="seat-dot" style={{ background: color }} />;
-}
-
 export function HandSummary({ room }: { room: RoomView }) {
   const g = room.game!;
   const r = g.history[g.history.length - 1];
@@ -24,7 +20,7 @@ export function HandSummary({ room }: { room: RoomView }) {
         <tbody>
           {order.map((i) => (
             <tr key={i}>
-              <td><SeatDot color={room.seats[i].color} />{room.seats[i].label}</td>
+              <td>{room.seats[i].label}</td>
               <td className={r.scored[i] > 0 ? 'bad' : r.scored[i] < 0 ? 'good' : ''}>{r.scored[i] > 0 ? '+' : ''}{r.scored[i]}</td>
               <td className="num">{g.scores[i]}</td>
             </tr>
@@ -56,7 +52,7 @@ export function GameOver({ room }: { room: RoomView }) {
       <ol className="standings">
         {order.map((i, place) => (
           <li key={i} className={g.winners.includes(i) ? 'winner' : ''}>
-            <span className="place">{place + 1}</span><SeatDot color={room.seats[i].color} /><span className="who">{room.seats[i].label}</span><span className="num">{g.scores[i]}</span>
+            <span className="place">{place + 1}</span><span className="who">{room.seats[i].label}</span><span className="num">{g.scores[i]}</span>
           </li>
         ))}
       </ol>
@@ -79,7 +75,7 @@ export function Scoreboard({ room, onClose }: { room: RoomView; onClose: () => v
         <div className="table-scroll">
           <table className="score-table grid">
             <thead>
-              <tr><th>Hand</th>{room.seats.map((s) => <th key={s.index}><SeatDot color={s.color} />{s.label}</th>)}</tr>
+              <tr><th>Hand</th>{room.seats.map((s) => <th key={s.index}>{s.label}</th>)}</tr>
             </thead>
             <tbody>
               {g.history.map((h) => (

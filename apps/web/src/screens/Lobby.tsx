@@ -13,7 +13,7 @@ function useNarrow(): boolean {
   return narrow;
 }
 import { ruleChips, type RoomView } from '@heartsgang/engine';
-import { Avatar, Table } from '../components/Table';
+import { Table } from '../components/Table';
 import { Chat } from '../components/Chat';
 import { ModePicker, RulesForm } from '../components/RulesForm';
 import { leaveTable, send, toast, useStore } from '../store';
@@ -31,7 +31,7 @@ export function Lobby({ room }: { room: RoomView }) {
                 {host ? (
                   <>
                     <button className="btn primary big" id="start-btn" disabled={empty.length > 0} onClick={() => send({ t: 'start' })}>Start game</button>
-                    {empty.length > 0 && <p className="muted">Fill {empty.map((s) => s.colorName).join(', ')} to start{' '}
+                    {empty.length > 0 && <p className="muted">Fill {empty.length === 1 ? 'the open seat' : `${empty.length} open seats`} to start{' '}
                       <button className="link-btn" onClick={() => send({ t: 'fillBots' })}>or add bots</button></p>}
                   </>
                 ) : <p className="muted">Waiting for the host to start…</p>}
@@ -77,21 +77,19 @@ export function Lobby({ room }: { room: RoomView }) {
               const mine = room.you.seat === s.index;
               const room_ = s.players.length < room.table.maxPerSeat;
               return (
-                <div key={s.index} className={`seat-card ${mine ? 'mine' : ''}`} style={{ ['--seat' as string]: s.color }}>
+                <div key={s.index} className={`seat-card ${mine ? 'mine' : ''}`}>
                   <div className="seat-card-head">
-                    <span className="seat-dot" style={{ background: s.color }} />
-                    <b>{s.colorName}</b>
+                    <b>Seat {s.index + 1}</b>
                     <small>{room.table.maxPerSeat > 1 ? `${s.players.length}/${room.table.maxPerSeat}` : ''}</small>
                   </div>
                   <ul>
                     {s.players.map((p) => (
                       <li key={p.id}>
-                        <Avatar name={p.name} color={p.color} connected={p.connected} size={26} />
                         <span>{p.name}{p.host && <em className="host-tag">host</em>}{p.id === room.you.id && <em className="you-tag">you</em>}</span>
                         {host && p.id !== room.you.id && <button className="icon-btn" title={`Remove ${p.name}`} onClick={() => send({ t: 'kick', playerId: p.id })}>✕</button>}
                       </li>
                     ))}
-                    {s.bot && <li><Avatar name={s.bot} color={s.color} bot size={26} /><span>{s.bot}</span>{host && <button className="icon-btn" title="Remove bot" onClick={() => send({ t: 'bot', seat: s.index, on: false })}>✕</button>}</li>}
+                    {s.bot && <li><span>{s.bot}</span>{host && <button className="icon-btn" title="Remove bot" onClick={() => send({ t: 'bot', seat: s.index, on: false })}>✕</button>}</li>}
                     {!s.players.length && !s.bot && <li className="muted">Empty seat</li>}
                   </ul>
                   <div className="seat-card-actions">

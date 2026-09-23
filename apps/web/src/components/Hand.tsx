@@ -54,7 +54,7 @@ export function Hand({ cards, marks, myId, legal, received, onToggle, disabled, 
           transform: `translateY(${o * o * curve - (raised ? 26 : 0)}px) rotate(${o * rot}deg)`,
           zIndex: i + 1,
           ['--deal-delay' as string]: `${i * 35}ms`,
-          boxShadow: raised ? `${ring}, 0 14px 26px rgba(0,0,0,.45)` : undefined,
+          boxShadow: raised ? `${ring}, 0 10px 20px rgba(20,24,32,.18)` : undefined,
         };
         return (
           <button

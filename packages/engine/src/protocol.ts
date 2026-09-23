@@ -17,7 +17,7 @@ export const SEAT_COLORS = [
 ];
 
 /** Colours for players' highlight rings and chat names. */
-export const PLAYER_COLORS = ['#ff6b6b', '#4dabf7', '#51cf66', '#fcc419', '#cc5de8', '#22b8cf', '#ff922b', '#f06595', '#94d82d', '#845ef7', '#20c997', '#ffd43b'];
+export const PLAYER_COLORS = ['#e03131', '#1c7ed6', '#2f9e44', '#e8590c', '#9c36b5', '#0c8599', '#d6336c', '#5f3dc4', '#66a80f', '#1098ad', '#c2255c', '#f08c00'];
 
 export interface ModePreset { key: string; label: string; seats: number; maxPerSeat: number; blurb: string }
 export const MODES: ModePreset[] = [
