@@ -58,6 +58,7 @@ function url(): string {
 }
 
 export function toast(text: string, kind: Toast['kind'] = 'error') {
+  if (state.toasts.some((t) => t.text === text)) return; // already on screen
   const key = ++seq;
   set({ toasts: [...state.toasts, { key, text, kind }].slice(-3) });
   setTimeout(() => set({ toasts: state.toasts.filter((t) => t.key !== key) }), kind === 'error' ? 4200 : 2600);
