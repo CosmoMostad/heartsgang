@@ -318,6 +318,30 @@ describe('playing', () => {
   });
 });
 
+describe('cleanup', () => {
+  it('removes tables once no human has been connected for half an hour, even if bots keep playing', async () => {
+    const { RoomManager } = await import('../src/rooms');
+    let now = 1_000_000;
+    const m = new RoomManager({ send: () => {}, now: () => now, timing: FAST });
+    const kept = m.create('token-aaaaaaaa', 'Olly', { mode: 'classic', seats: 4, maxPerSeat: 1 }, {});
+    const left = m.create('token-bbbbbbbb', 'Sam', { mode: 'classic', seats: 4, maxPerSeat: 1 }, {});
+    left.room.leave(left.playerId);
+    m.sweep();
+    expect(m.rooms.has(left.room.code)).toBe(false);
+    expect(m.rooms.has(kept.room.code)).toBe(true);
+    kept.room.setConnected(kept.playerId, false);
+    now += 29 * 60 * 1000;
+    kept.room.lastActive = now; // bots still moving
+    m.sweep();
+    expect(m.rooms.has(kept.room.code)).toBe(true);
+    now += 2 * 60 * 1000;
+    kept.room.lastActive = now;
+    m.sweep();
+    expect(m.rooms.has(kept.room.code)).toBe(false);
+    m.stop();
+  });
+});
+
 describe('restarts', () => {
   it('restores tables and hands from disk after a restart', async () => {
     const dataDir = mkdtempSync(join(tmpdir(), 'hg-data-'));

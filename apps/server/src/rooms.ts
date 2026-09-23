@@ -68,12 +68,14 @@ export class RoomManager {
     renameSync(tmp, this.file());
   }
 
+  /** Remove tables nobody is at. Bot moves don't count as somebody being there. */
   sweep(): void {
     const idle = this.opts.idleMs ?? 6 * 3600 * 1000;
     const now = this.deps.now();
     for (const [code, room] of this.rooms) {
-      const empty = room.connectedCount() === 0;
-      if ((empty && now - room.lastActive > 30 * 60 * 1000) || now - room.lastActive > idle) {
+      const lastHuman = room.players.reduce((t, p) => Math.max(t, p.connected ? now : p.lastSeen), 0);
+      const abandoned = room.players.length === 0 || now - lastHuman > 30 * 60 * 1000;
+      if (abandoned || now - room.lastActive > idle) {
         room.dispose();
         this.rooms.delete(code);
         this.dirty = true;
