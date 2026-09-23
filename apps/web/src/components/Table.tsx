@@ -176,7 +176,7 @@ function Seat({ seat, room, bottom, emotes, narrow }: { seat: SeatView; room: Ro
             <div className="plate-meta">
               <span className="seat-color">{seat.colorName}</span>
               {isMe && <span className="you-meta">you</span>}
-              {seat.players.length > 1 && <span className="team-tag">team of {seat.players.length}</span>}
+              {seat.players.length > 1 && !isMe && <span className="team-tag">team of {seat.players.length}</span>}
             </div>
           </div>
           {g && (
