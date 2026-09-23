@@ -59,6 +59,8 @@ describe('http', () => {
     expect(asset.headers.get('cache-control')).toContain('immutable');
     expect((await fetch(`${base}/assets/missing.js`)).status).toBe(404);
     expect((await fetch(`${base}/../../etc/passwd`)).status).not.toBe(500);
+    expect((await fetch(`${base}/%E0%A4%A`)).status).toBe(400);
+    expect((await fetch(`${base}/health`)).status).toBe(200); // still alive
   });
 });
 

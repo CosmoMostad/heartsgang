@@ -39,8 +39,14 @@ export function startServer(opts: ServerOptions): Promise<{ server: Server; mana
 
   const serveStatic = (req: IncomingMessage, res: ServerResponse) => {
     if (!staticRoot) { res.writeHead(404).end('Not found'); return; }
-    const url = new URL(req.url ?? '/', 'http://x');
-    let path = normalize(decodeURIComponent(url.pathname)).replace(/^([/\\])+/, '');
+    let path: string;
+    try {
+      const url = new URL(req.url ?? '/', 'http://x');
+      path = normalize(decodeURIComponent(url.pathname)).replace(/^([/\\])+/, '');
+    } catch {
+      res.writeHead(400).end('Bad request');
+      return;
+    }
     let file = join(staticRoot, path);
     if (!file.startsWith(staticRoot)) { res.writeHead(403).end(); return; }
     if (!path || !existsSync(file) || statSync(file).isDirectory()) {
@@ -51,10 +57,20 @@ export function startServer(opts: ServerOptions): Promise<{ server: Server; mana
     const type = TYPES[extname(file)] ?? 'application/octet-stream';
     const cache = path.startsWith('assets/') ? 'public, max-age=31536000, immutable' : 'no-cache';
     res.writeHead(200, { 'Content-Type': type, 'Cache-Control': cache, 'X-Content-Type-Options': 'nosniff' });
-    createReadStream(file).pipe(res);
+    createReadStream(file).on('error', () => res.destroy()).pipe(res);
   };
 
   const server = createServer((req, res) => {
+    try {
+      route(req, res);
+    } catch (e) {
+      console.error('[http] request failed', e);
+      if (!res.headersSent) res.writeHead(500);
+      res.end();
+    }
+  });
+
+  const route = (req: IncomingMessage, res: ServerResponse) => {
     if (req.url === '/health') {
       res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
       res.end(JSON.stringify({ ok: true, tables: manager.rooms.size, version: opts.version ?? 'dev' }));
@@ -62,7 +78,7 @@ export function startServer(opts: ServerOptions): Promise<{ server: Server; mana
     }
     if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405).end(); return; }
     serveStatic(req, res);
-  });
+  };
 
   const wss = new WebSocketServer({ server, path: '/ws', maxPayload: 16 * 1024 });
 
